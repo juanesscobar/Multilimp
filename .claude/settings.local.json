@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose up *)",
+      "Bash(docker compose *)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -X POST http://localhost:8000/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"admin@limpieza.com\",\"password\":\"admin1234\"}')",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s \"http://localhost:8000/catalogo/productos\")"
+    ]
+  }
+}

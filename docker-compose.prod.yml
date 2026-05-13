@@ -1,0 +1,25 @@
+version: '3.9'
+
+# Uso: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  db:
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    volumes: []
+
+  frontend:
+    build:
+      context: ./frontend
+      target: runner
+    restart: always
+    command: npm start
+    volumes: []
+
+volumes:
+  postgres_data:

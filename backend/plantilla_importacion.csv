@@ -1,0 +1,6 @@
+nombre,descripcion,categoria,precio_venta,precio_costo,stock_actual,stock_minimo,sku,unidad_medida
+Detergente Multiusos 1L,Detergente concentrado para todo tipo de superficies,Detergentes,15000,8000,50,10,DET-001,litro
+Lavandina Regular 2L,Blanqueador doméstico hipoclorito de sodio al 5%,Lavandina / Blanqueadores,12000,6000,80,15,LAV-001,litro
+Desinfectante Floral 500ml,Desinfectante con fragancia floral para pisos,Desinfectantes,18000,10000,30,8,DES-001,litro
+Lavavajillas Limón 750ml,Lava vajillas con aroma a limón y glicerina,Lavavajillas,9500,4500,60,12,LVJ-001,unidad
+Limpiador Baño 500ml,Elimina sarro y manchas de baños,Limpiadores multiusos,14000,7000,25,5,LMP-001,unidad
