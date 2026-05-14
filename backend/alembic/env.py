@@ -5,10 +5,15 @@ from sqlmodel import SQLModel
 
 # Import all models so Alembic detects them
 import app.models  # noqa: F401
+from app.config import settings
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+# Usar DATABASE_URL del entorno, no el hardcodeado en alembic.ini
+_db_url = settings.database_url.replace("postgres://", "postgresql://", 1)
+config.set_main_option("sqlalchemy.url", _db_url)
 
 target_metadata = SQLModel.metadata
 
