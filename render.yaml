@@ -9,8 +9,7 @@ services:
   - type: web
     name: multilimp-backend
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    rootDir: backend
     plan: free
     healthCheckPath: /health
 
