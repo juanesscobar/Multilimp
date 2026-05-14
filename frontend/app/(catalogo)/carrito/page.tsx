@@ -52,7 +52,7 @@ const STEP_INDEX: Record<Step, number> = {
 };
 
 export default function CarritoPage() {
-  const { items, updateQuantity, removeItem, clearCart } = useCart();
+  const { items, updateQty: updateQuantity, removeItem, clearCart } = useCart();
   const router = useRouter();
 
   const [form, setForm] = useState<FormState>({
