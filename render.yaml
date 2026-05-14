@@ -46,6 +46,9 @@ services:
       - key: NOMBRE_NEGOCIO
         value: MultiLimp
 
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
   # ── Frontend ───────────────────────────────────────────────────────────────
   - type: web
     name: multilimp-frontend
