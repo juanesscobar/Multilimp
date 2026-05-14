@@ -30,7 +30,7 @@ services:
         value: 1440
 
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: "https://multilimp-frontend.onrender.com"
 
       - key: CLOUDINARY_CLOUD_NAME
         sync: false

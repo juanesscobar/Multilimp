@@ -2,14 +2,40 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.database import create_db_and_tables
+from app.database import create_db_and_tables, engine
 from app.config import settings
 from app.routers import auth, categorias, productos, catalogo, ventas, stock, dashboard, config_publica, configuracion
+
+
+def _seed_initial_data():
+    from sqlmodel import Session, select
+    from app.models import Usuario, RolUsuario, Categoria
+    from passlib.context import CryptContext
+
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    with Session(engine) as session:
+        if not session.exec(select(Usuario).where(Usuario.email == "admin@multilimp.com")).first():
+            session.add(Usuario(
+                nombre="Administrador",
+                email="admin@multilimp.com",
+                password_hash=pwd_context.hash("admin1234"),
+                rol=RolUsuario.admin,
+            ))
+        categorias_base = [
+            "Desinfectantes", "Detergentes", "Lavavajillas",
+            "Lavandina / Blanqueadores", "Limpiadores multiusos",
+            "Productos para pisos", "Cuidado de ropa", "Insumos industriales",
+        ]
+        for nombre in categorias_base:
+            if not session.exec(select(Categoria).where(Categoria.nombre == nombre)).first():
+                session.add(Categoria(nombre=nombre))
+        session.commit()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
+    _seed_initial_data()
     yield
 
 
