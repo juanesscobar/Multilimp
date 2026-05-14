@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from app.database import create_db_and_tables
 from app.config import settings
-from app.routers import auth, categorias, productos, catalogo, ventas, stock, dashboard, config_publica
+from app.routers import auth, categorias, productos, catalogo, ventas, stock, dashboard, config_publica, configuracion
 
 
 @asynccontextmanager
@@ -19,9 +19,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# CORS dinámico — se configura via variable de entorno ALLOWED_ORIGINS
+_origins = [o.strip() for o in settings.allowed_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,6 +38,7 @@ app.include_router(ventas.router, prefix="/ventas", tags=["Ventas"])
 app.include_router(stock.router, prefix="/stock", tags=["Stock"])
 app.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 app.include_router(config_publica.router, prefix="/config", tags=["Configuración"])
+app.include_router(configuracion.router, prefix="/configuracion", tags=["Configuración Admin"])
 
 
 @app.get("/", tags=["Health"])

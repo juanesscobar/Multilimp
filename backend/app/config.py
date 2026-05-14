@@ -12,9 +12,14 @@ class Settings(BaseSettings):
     cloudinary_api_key: str = ""
     cloudinary_api_secret: str = ""
 
-    whatsapp_negocio: str = "595991000000"
-    alias_pago: str = "0991-000000"
-    nombre_negocio: str = "Distribuidora Limpieza S.A."
+    whatsapp_negocio: str = "595973996276"
+    alias_pago: str = "0973996276"
+    nombre_negocio: str = "MultiLimp"
+
+    # CORS: lista separada por comas
+    # Dev local: http://localhost:3000,http://localhost:3001
+    # Render: https://multilimp-frontend.onrender.com,http://localhost:3000
+    allowed_origins: str = "http://localhost:3000,http://localhost:3001"
 
     class Config:
         env_file = ".env"

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, ShoppingCart,
-  Warehouse, LogOut, Droplets
+  Warehouse, LogOut, Droplets, Settings, ExternalLink
 } from 'lucide-react'
 import { removeToken } from '@/lib/api'
 import { useRouter } from 'next/navigation'
@@ -14,7 +14,12 @@ const navItems = [
   { href: '/productos', label: 'Productos', icon: Package },
   { href: '/ventas', label: 'Ventas', icon: ShoppingCart },
   { href: '/stock', label: 'Stock', icon: Warehouse },
+  { href: '/configuracion', label: 'Configuración', icon: Settings },
 ]
+
+const CATALOG_URL = process.env.NEXT_PUBLIC_API_URL
+  ? process.env.NEXT_PUBLIC_API_URL.replace(':8000', ':3000')
+  : 'http://localhost:3000'
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -60,6 +65,17 @@ export default function Sidebar() {
             </Link>
           )
         })}
+
+        {/* Link catálogo público */}
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-brand-200 hover:bg-white/10 hover:text-white transition-all mt-2"
+        >
+          <ExternalLink className="w-4 h-4 flex-shrink-0" />
+          Ver Catálogo
+        </a>
       </nav>
 
       {/* Logout */}

@@ -219,52 +219,81 @@ Plantilla de ejemplo: `backend/plantilla_importacion.csv`
 
 ---
 
-## Deploy en Railway
+## Deploy en Render
 
-### Opción A — Deploy desde GitHub (recomendado)
+Render ofrece un free tier suficiente para este sistema: 1 PostgreSQL + 2 web services.
 
-1. Crear cuenta en [Railway](https://railway.app)
-2. Conectar el repositorio de GitHub
-3. Railway detecta los `railway.toml` y crea los servicios automáticamente
-
-#### Variables de entorno en Railway (Backend):
-
-```
-DATABASE_URL        → usar la variable ${{Postgres.DATABASE_URL}} de Railway
-SECRET_KEY          → cadena aleatoria segura (openssl rand -hex 32)
-CLOUDINARY_CLOUD_NAME
-CLOUDINARY_API_KEY
-CLOUDINARY_API_SECRET
-WHATSAPP_NEGOCIO
-ALIAS_PAGO
-NOMBRE_NEGOCIO
-```
-
-#### Variables de entorno en Railway (Frontend):
-
-```
-NEXT_PUBLIC_API_URL         → URL pública del servicio backend en Railway
-NEXT_PUBLIC_NOMBRE_NEGOCIO
-NEXT_PUBLIC_WHATSAPP_NEGOCIO
-```
-
-### Opción B — Deploy manual con CLI
+### Paso 1 — Subir el código a GitHub
 
 ```bash
-npm install -g @railway/cli
-railway login
-railway init
-railway up
+git init
+git add .
+git commit -m "Initial commit"
+gh repo create multilimp --private --push --source=.
 ```
 
-### Base de datos en Railway
+### Paso 2 — Conectar con Render
 
-Railway ofrece PostgreSQL gestionado. Al crearlo, la variable `DATABASE_URL` se inyecta automáticamente en el backend.
+1. Crear cuenta en [render.com](https://render.com)
+2. Ir a **New → Blueprint**
+3. Conectar el repositorio de GitHub
+4. Render detecta el `render.yaml` y crea automáticamente:
+   - Base de datos PostgreSQL (`multilimp-db`)
+   - Backend (`multilimp-backend`) — imagen Docker
+   - Frontend (`multilimp-frontend`) — Node.js nativo
 
-El comando de inicio del backend (`railway.toml`) ejecuta las migraciones automáticamente:
+### Paso 3 — Configurar variables de entorno
+
+Después del primer deploy, completar en el dashboard de Render las variables marcadas como `sync: false`:
+
+#### Backend (`multilimp-backend` → Environment):
+
+| Variable | Valor |
+|----------|-------|
+| `ALLOWED_ORIGINS` | `https://multilimp-frontend.onrender.com,http://localhost:3000` |
+| `CLOUDINARY_CLOUD_NAME` | Tu cloud name de Cloudinary |
+| `CLOUDINARY_API_KEY` | Tu API key de Cloudinary |
+| `CLOUDINARY_API_SECRET` | Tu API secret de Cloudinary |
+| `WHATSAPP_NEGOCIO` | Ej: `595981000000` |
+| `ALIAS_PAGO` | Ej: `0981-000000` |
+
+> `SECRET_KEY` es generado automáticamente por Render. `DATABASE_URL` se inyecta desde la base de datos.
+
+#### Frontend (`multilimp-frontend` → Environment):
+
+| Variable | Valor |
+|----------|-------|
+| `NEXT_PUBLIC_API_URL` | `https://multilimp-backend.onrender.com` |
+| `NEXT_PUBLIC_WHATSAPP_NEGOCIO` | Ej: `595981000000` |
+
+> **Importante:** `NEXT_PUBLIC_API_URL` debe estar configurada **antes** del build del frontend, porque Next.js la embebe en el bundle durante la compilación. Después de setearla, forzá un redeploy manual del frontend en Render.
+
+### Paso 4 — Cargar datos iniciales
+
+Una vez que el backend esté activo, ejecutar el seed desde el shell de Render:
+
+```bash
+# En el dashboard: multilimp-backend → Shell
+python seed.py
 ```
-alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
-```
+
+Esto crea el usuario admin (`admin@limpieza.com` / `admin1234`) y las categorías base.
+
+> **Cambiá la contraseña en producción** usando el endpoint `PUT /auth/usuarios/{id}`.
+
+### Paso 5 — Acceder
+
+| Servicio | URL |
+|----------|-----|
+| Catálogo público | `https://multilimp-frontend.onrender.com` |
+| Panel admin | `https://multilimp-frontend.onrender.com/login` |
+| API / Swagger | `https://multilimp-backend.onrender.com/docs` |
+
+### Notas del free tier de Render
+
+- Los web services se **suspenden** tras 15 min sin tráfico. La primera petición después puede tardar ~30 seg.
+- La base de datos PostgreSQL free tier expira a los **90 días** — renovarla desde el dashboard o migrar a paid.
+- Para evitar la suspensión, usar un servicio de ping externo (UptimeRobot, cron-job.org) apuntando a `https://multilimp-backend.onrender.com/health`.
 
 ---
 
@@ -307,8 +336,9 @@ MultiLimp/
 │   │   └── utils.ts             # formatGs, formatDate, cn, badges
 │   └── railway.toml
 │
-├── docker-compose.yml           # Desarrollo
-├── docker-compose.prod.yml      # Override producción
+├── docker-compose.yml           # Desarrollo local
+├── docker-compose.prod.yml      # Override producción Docker
+├── render.yaml                  # Deploy en Render (Blueprint IaC)
 ├── Makefile                     # Comandos rápidos
 ├── setup.sh                     # Primer inicio automatizado
 └── .gitignore
@@ -327,7 +357,8 @@ MultiLimp/
 | Ventas | `/ventas` | Mixto |
 | Stock | `/stock` | Admin |
 | Dashboard | `/dashboard` | Admin |
-| Configuración | `/config` | ❌ Sin auth |
+| Config pública | `/config` | ❌ Sin auth |
+| Config admin | `/configuracion` | Admin |
 
 Documentación interactiva completa disponible en: **`http://localhost:8000/docs`**
 

@@ -1,0 +1,71 @@
+databases:
+  - name: multilimp-db
+    databaseName: limpieza_db
+    user: admin
+    plan: free
+
+services:
+  # ── Backend ────────────────────────────────────────────────────────────────
+  - type: web
+    name: multilimp-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: multilimp-db
+          property: connectionString
+
+      - key: SECRET_KEY
+        generateValue: true          # Render genera un valor seguro automáticamente
+
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 1440
+
+      # CORS: agregá la URL del frontend después del primer deploy
+      # Ej: https://multilimp-frontend.onrender.com,http://localhost:3000
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+      # Cloudinary — completar en el dashboard de Render
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # Datos del negocio — podés cambiarlos en el dashboard
+      - key: WHATSAPP_NEGOCIO
+        sync: false
+      - key: ALIAS_PAGO
+        sync: false
+      - key: NOMBRE_NEGOCIO
+        value: Distribuidora Limpieza S.A.
+
+  # ── Frontend ───────────────────────────────────────────────────────────────
+  - type: web
+    name: multilimp-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start -- -p $PORT
+    plan: free
+
+    envVars:
+      # Completar con la URL del backend ANTES del primer build del frontend
+      # Ej: https://multilimp-backend.onrender.com
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+
+      - key: NEXT_PUBLIC_NOMBRE_NEGOCIO
+        value: Distribuidora Limpieza S.A.
+
+      - key: NEXT_PUBLIC_WHATSAPP_NEGOCIO
+        sync: false

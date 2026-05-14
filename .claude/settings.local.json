@@ -7,7 +7,10 @@
       "Bash(python3 -m json.tool)",
       "Bash(curl -s -X POST http://localhost:8000/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"admin@limpieza.com\",\"password\":\"admin1234\"}')",
       "Bash(python3 -c ' *)",
-      "Bash(curl -s \"http://localhost:8000/catalogo/productos\")"
+      "Bash(curl -s \"http://localhost:8000/catalogo/productos\")",
+      "Bash(curl -s -X POST http://localhost:8000/ventas -H 'Content-Type: application/json' -d '{\"cliente_nombre\":\"Juan Perez\",\"cliente_telefono\":\"0991123456\",\"metodo_pago\":\"efectivo\",\"descuento\":0,\"origen\":\"catalogo\",\"items\":[{\"producto_id\":1,\"cantidad\":2},{\"producto_id\":4,\"cantidad\":3}]}')",
+      "Bash(curl -s http://localhost:8000/ventas/1/comprobante)",
+      "Bash(curl *)"
     ]
   }
 }

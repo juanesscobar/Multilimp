@@ -4,6 +4,7 @@ from app.models.venta import Venta, MetodoPago, EstadoVenta, OrigenVenta
 from app.models.item_venta import ItemVenta
 from app.models.movimiento_stock import MovimientoStock, TipoMovimiento
 from app.models.usuario import Usuario, RolUsuario
+from app.models.config_negocio import ConfigNegocio
 
 __all__ = [
     "Categoria",
@@ -17,4 +18,5 @@ __all__ = [
     "TipoMovimiento",
     "Usuario",
     "RolUsuario",
+    "ConfigNegocio",
 ]

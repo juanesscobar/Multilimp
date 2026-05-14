@@ -149,7 +149,21 @@ export interface ConfigPublica {
   nombre_negocio: string
   whatsapp_negocio: string
   alias_pago: string
+  datos_transferencia: string
+  nombre_banco: string
+  nro_cuenta: string
+  titular_cuenta: string
   cloudinary_habilitado: boolean
+}
+
+export interface ConfigAdmin {
+  nombre_negocio: string
+  whatsapp_negocio: string
+  alias_pago: string
+  datos_transferencia: string
+  nombre_banco: string
+  nro_cuenta: string
+  titular_cuenta: string
 }
 
 // ─── Auth token helpers ────────────────────────────────────────────────────────
@@ -219,9 +233,16 @@ export const api = {
     me: () => request<{ id: number; nombre: string; email: string; rol: string }>('/auth/me'),
   },
 
-  // Config
+  // Config pública
   config: {
     get: () => request<ConfigPublica>('/config', {}, false),
+  },
+
+  // Configuración admin (requiere auth)
+  configuracion: {
+    get: () => request<ConfigAdmin>('/configuracion'),
+    update: (data: Partial<ConfigAdmin>) =>
+      request<ConfigAdmin>('/configuracion', { method: 'PUT', body: JSON.stringify(data) }),
   },
 
   // Categorías

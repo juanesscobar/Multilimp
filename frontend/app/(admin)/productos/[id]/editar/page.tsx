@@ -1,9 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api, Producto, Categoria } from '@/lib/api'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, Save, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Loader2, ImagePlus, X } from 'lucide-react'
 import Link from 'next/link'
 import Header from '@/components/admin/Header'
 
@@ -19,6 +19,10 @@ export default function EditarProductoPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>('')
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const [form, setForm] = useState({
     nombre: '',
@@ -40,6 +44,7 @@ export default function EditarProductoPage() {
       api.productos.get(id),
     ]).then(([cats, prod]) => {
       setCategorias(cats)
+      setCurrentImageUrl(prod.imagen_url ?? '')
       setForm({
         nombre: prod.nombre,
         descripcion: prod.descripcion ?? '',
@@ -56,6 +61,19 @@ export default function EditarProductoPage() {
     }).catch(() => setError('No se pudo cargar el producto'))
       .finally(() => setLoading(false))
   }, [id])
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
+
+  function removeNewImage() {
+    setImageFile(null)
+    setImagePreview('')
+    if (fileRef.current) fileRef.current.value = ''
+  }
 
   function validate() {
     const errs: Record<string, string> = {}
@@ -84,6 +102,9 @@ export default function EditarProductoPage() {
         stop_venta: form.stop_venta,
         activo: form.activo,
       })
+      if (imageFile) {
+        await api.productos.uploadImage(id, imageFile)
+      }
       router.push('/productos')
     } catch (err: any) {
       setError(err.message ?? 'Error al guardar')
@@ -98,6 +119,8 @@ export default function EditarProductoPage() {
       fieldErrors[name] ? 'border-red-400' : 'border-surface-border'
     ),
   })
+
+  const displayImage = imagePreview || currentImageUrl
 
   return (
     <>
@@ -122,6 +145,52 @@ export default function EditarProductoPage() {
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700">{error}</div>
             )}
+
+            {/* Imagen */}
+            <div className="bg-white rounded-xl border border-surface-border p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <ImagePlus className="w-4 h-4 text-brand-400" />
+                <h2 className="font-syne font-semibold text-brand-800 text-sm uppercase tracking-wide">Imagen del producto</h2>
+              </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+              {displayImage ? (
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-brand-50 border border-surface-border">
+                  <img src={displayImage} alt="Vista previa" className="w-full h-full object-contain" />
+                  {imagePreview && (
+                    <button
+                      type="button"
+                      onClick={removeNewImage}
+                      className="absolute top-2 right-2 bg-white border border-surface-border rounded-lg p-1.5 shadow hover:bg-red-50 transition-colors"
+                    >
+                      <X className="w-4 h-4 text-red-500" />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="w-full border-2 border-dashed border-surface-border rounded-xl p-8 flex flex-col items-center gap-3 text-text-muted hover:border-brand-400 hover:text-brand-400 transition-colors"
+                >
+                  <ImagePlus className="w-8 h-8" />
+                  <span className="text-sm font-medium">Hacer clic para subir imagen</span>
+                  <span className="text-xs">PNG, JPG o WEBP — máx. 5 MB</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="text-xs text-brand-400 hover:text-brand-700 font-medium transition-colors"
+              >
+                {displayImage ? 'Cambiar imagen' : 'Subir imagen'}
+              </button>
+            </div>
 
             {/* Información básica */}
             <div className="bg-white rounded-xl border border-surface-border p-5 space-y-4">

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getToken } from '@/lib/api'
 import Sidebar from '@/components/admin/Sidebar'
+import QuickActions from '@/components/admin/QuickActions'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -30,6 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="ml-64 pt-14 min-h-screen">
         {children}
       </main>
+      <QuickActions />
     </div>
   )
 }
