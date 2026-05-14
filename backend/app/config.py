@@ -3,7 +3,7 @@ from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql://admin:admin123@localhost:5432/limpieza_db"
+    database_url: str
     secret_key: str = "cambia-esto-en-produccion-clave-muy-secreta-larga"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 1440
