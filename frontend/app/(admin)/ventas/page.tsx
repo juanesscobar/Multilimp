@@ -463,20 +463,18 @@ export default function VentasPage() {
                         Confirmar
                       </button>
                     )}
-                    {selectedVenta.estado !== 'cancelado' && (
-                      <button
-                        onClick={() => handleChangeEstado(selectedVenta.id, 'cancelado')}
-                        disabled={changingEstado}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {changingEstado ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <XCircle className="w-4 h-4" />
-                        )}
-                        Cancelar
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleChangeEstado(selectedVenta.id, 'cancelado')}
+                      disabled={changingEstado}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {changingEstado ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <XCircle className="w-4 h-4" />
+                      )}
+                      Cancelar
+                    </button>
                   </div>
                 </section>
               )}
