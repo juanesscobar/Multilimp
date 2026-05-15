@@ -10,19 +10,21 @@ MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024
 
 
 def _configure():
-    cloudinary.config(
-        cloud_name=settings.cloudinary_cloud_name,
-        api_key=settings.cloudinary_api_key,
-        api_secret=settings.cloudinary_api_secret,
-        secure=True,
-    )
+    if settings.cloudinary_url:
+        cloudinary.config(cloudinary_url=settings.cloudinary_url, secure=True)
+    else:
+        cloudinary.config(
+            cloud_name=settings.cloudinary_cloud_name,
+            api_key=settings.cloudinary_api_key,
+            api_secret=settings.cloudinary_api_secret,
+            secure=True,
+        )
 
 
 def _cloudinary_habilitado() -> bool:
     return bool(
-        settings.cloudinary_cloud_name
-        and settings.cloudinary_api_key
-        and settings.cloudinary_api_secret
+        settings.cloudinary_url
+        or (settings.cloudinary_cloud_name and settings.cloudinary_api_key and settings.cloudinary_api_secret)
     )
 
 
