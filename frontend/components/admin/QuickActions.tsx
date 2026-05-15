@@ -285,15 +285,25 @@ function ProductoRapidoModal({ onClose }: { onClose: () => void }) {
     sku: '',
     unidad_medida: 'unidad',
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     api.categorias.list(true).then(setCategorias).catch(() => { })
   }, [])
 
   const set = (k: string, v: string | number) => setForm(f => ({ ...f, [k]: v }))
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
 
   async function handleSubmit() {
     if (!form.nombre.trim()) { setError('El nombre es obligatorio'); return }
@@ -311,8 +321,13 @@ function ProductoRapidoModal({ onClose }: { onClose: () => void }) {
         stock_minimo: Number(form.stock_minimo),
         unidad_medida: form.unidad_medida,
       })
+      if (imageFile) {
+        try { await api.productos.uploadImage(prod.id, imageFile) } catch { }
+      }
       setSuccess(`"${prod.nombre}" creado con stock ${prod.stock_actual}`)
       setForm({ nombre: '', categoria_id: 0, precio_venta: '', stock_actual: '0', stock_minimo: '5', sku: '', unidad_medida: 'unidad' })
+      setImageFile(null)
+      setImagePreview(null)
     } catch (err: any) {
       setError(err.message ?? 'Error al crear el producto')
     } finally {
@@ -410,6 +425,31 @@ function ProductoRapidoModal({ onClose }: { onClose: () => void }) {
             placeholder="Ej: DET-001"
             className="w-full border border-surface-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
           />
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-text-secondary mb-1 uppercase tracking-wide">Imagen (opcional)</label>
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+          {imagePreview ? (
+            <div className="relative w-full h-28 rounded-lg overflow-hidden border border-surface-border">
+              <img src={imagePreview} alt="preview" className="w-full h-full object-contain bg-brand-50" />
+              <button
+                onClick={() => { setImageFile(null); setImagePreview(null) }}
+                className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow border border-surface-border"
+              >
+                <X className="w-3 h-3 text-text-secondary" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full h-20 border-2 border-dashed border-surface-border rounded-lg flex flex-col items-center justify-center gap-1 text-text-muted hover:border-brand-400 hover:text-brand-400 transition-colors text-xs"
+            >
+              <Plus className="w-4 h-4" />
+              Agregar imagen
+            </button>
+          )}
         </div>
 
         {error && (
