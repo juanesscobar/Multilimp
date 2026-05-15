@@ -95,10 +95,10 @@ export default function VentasPage() {
   const totalPages = ventas?.pages ?? 1
 
   return (
-    <div className="min-h-screen bg-surface-bg">
+    <div>
       <Header title="Ventas" />
 
-      <div className="pt-14 ml-64 p-6 space-y-4">
+      <div className="p-6 space-y-4">
         <div className="flex items-center gap-2 bg-white border border-surface-border rounded-xl p-4 flex-wrap gap-3">
           <div className="flex items-center gap-2 text-text-secondary">
             <Filter className="w-4 h-4" />

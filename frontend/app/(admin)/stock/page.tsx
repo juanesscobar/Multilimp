@@ -94,7 +94,7 @@ export default function StockPage() {
   }
 
   return (
-    <div className="pt-14 min-h-screen bg-surface-bg">
+    <div>
       <Header title="Stock" />
 
       <div className="p-6">

@@ -125,7 +125,7 @@ export default function DashboardPage() {
     : chartData.map((v) => v.label)
 
   return (
-    <div className="pt-14 min-h-screen bg-surface-bg">
+    <div>
       <Header title="Dashboard" />
 
       <div className="p-6 space-y-6">

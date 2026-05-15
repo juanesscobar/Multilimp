@@ -17,7 +17,8 @@ export default function Header({ title }: Props) {
   }, [])
 
   return (
-    <header className="fixed top-0 left-64 right-0 h-14 bg-white border-b border-surface-border flex items-center justify-between px-6 z-20">
+    // En móvil el layout ya tiene una barra azul — este header solo se muestra en desktop
+    <header className="hidden lg:flex fixed top-0 left-64 right-0 h-14 bg-white border-b border-surface-border items-center justify-between px-6 z-20">
       <h1 className="font-syne font-semibold text-brand-800 text-lg">{title}</h1>
       <div className="flex items-center gap-3">
         {alertas > 0 && (

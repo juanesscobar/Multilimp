@@ -116,7 +116,7 @@ export default function NuevoProductoPage() {
   }
 
   return (
-    <div className="pt-14 min-h-screen bg-surface-bg">
+    <div>
       <Header title="Nuevo Producto" />
 
       <div className="max-w-2xl mx-auto p-6">
