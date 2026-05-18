@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { useReactToPrint } from 'react-to-print'
 import { api, Venta, PaginatedVentas } from '@/lib/api'
 import { formatGs, formatDate, estadoBadgeClass, metodoPagoLabel, cn } from '@/lib/utils'
 import {
-  Search,
   Filter,
   ChevronLeft,
   ChevronRight,
@@ -15,8 +15,10 @@ import {
   ShoppingBag,
   Eye,
   Calendar,
+  Printer,
 } from 'lucide-react'
 import Header from '@/components/admin/Header'
+import ComprobanteImprimible from '@/components/admin/ComprobanteImprimible'
 
 interface Filters {
   estado: string
@@ -39,6 +41,11 @@ export default function VentasPage() {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [page, setPage] = useState(1)
   const [changingEstado, setChangingEstado] = useState(false)
+  const printRef = useRef<HTMLDivElement>(null)
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: selectedVenta?.numero_venta ?? 'Comprobante',
+  })
 
   const fetchVentas = useCallback(async () => {
     setLoading(true)
@@ -313,12 +320,27 @@ export default function VentasPage() {
                   {selectedVenta.numero_venta}
                 </h2>
               </div>
-              <button
-                onClick={closeDrawer}
-                className="p-2 rounded-lg hover:bg-gray-100 text-text-muted transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePrint()}
+                  title="Imprimir comprobante"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-brand-700 border border-brand-200 rounded-lg hover:bg-brand-50 transition-colors"
+                >
+                  <Printer className="w-4 h-4" />
+                  Imprimir
+                </button>
+                <button
+                  onClick={closeDrawer}
+                  className="p-2 rounded-lg hover:bg-gray-100 text-text-muted transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Componente oculto para impresión */}
+            <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
+              <ComprobanteImprimible ref={printRef} venta={selectedVenta} />
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
