@@ -29,27 +29,48 @@ interface ProductComboboxProps {
 function ProductCombobox({ productos, value, onChange, placeholder = 'Buscar producto...' }: ProductComboboxProps) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
+  const [searchResults, setSearchResults] = useState<Producto[] | null>(null)
+  const [searching, setSearching] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const selected = productos.find(p => p.id === value)
-
-  const filtered = query.trim()
+  const filtered = searchResults ?? (query.trim()
     ? productos.filter(p =>
         p.nombre.toLowerCase().includes(query.toLowerCase()) ||
         (p.sku ?? '').toLowerCase().includes(query.toLowerCase()),
       )
-    : productos
+    : productos)
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false)
+        setSearchResults(null)
         if (!selected) setQuery('')
       }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [selected])
+
+  const handleQueryChange = (q: string) => {
+    setQuery(q)
+    setOpen(true)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!q.trim()) { setSearchResults(null); return }
+    setSearching(true)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await api.productos.list({ search: q, limit: 50, activo: true })
+        setSearchResults(res.items)
+      } catch {
+        setSearchResults(null)
+      } finally {
+        setSearching(false)
+      }
+    }, 300)
+  }
 
   const handleSelect = (p: Producto) => {
     onChange(p.id)
@@ -61,6 +82,7 @@ function ProductCombobox({ productos, value, onChange, placeholder = 'Buscar pro
     e.stopPropagation()
     onChange('')
     setQuery('')
+    setSearchResults(null)
     setOpen(false)
   }
 
@@ -80,7 +102,7 @@ function ProductCombobox({ productos, value, onChange, placeholder = 'Buscar pro
             className="flex-1 px-2 py-2.5 text-sm text-text-primary bg-transparent outline-none placeholder:text-text-muted"
             placeholder={selected ? `${selected.nombre}${selected.sku ? ` (${selected.sku})` : ''}` : placeholder}
             value={query}
-            onChange={e => { setQuery(e.target.value); setOpen(true) }}
+            onChange={e => handleQueryChange(e.target.value)}
             onFocus={() => setOpen(true)}
           />
         )}
@@ -95,8 +117,14 @@ function ProductCombobox({ productos, value, onChange, placeholder = 'Buscar pro
 
       {open && (
         <div className="absolute z-50 mt-1 w-full bg-white border border-surface-border rounded-lg shadow-lg max-h-52 overflow-y-auto">
-          {filtered.length === 0 ? (
-            <p className="px-3 py-2.5 text-sm text-text-muted">Sin resultados</p>
+          {searching ? (
+            <p className="px-3 py-2.5 text-sm text-text-muted flex items-center gap-2">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Buscando...
+            </p>
+          ) : filtered.length === 0 ? (
+            <p className="px-3 py-2.5 text-sm text-text-muted">
+              {query.trim() ? 'Sin resultados' : 'Escribí para buscar un producto'}
+            </p>
           ) : (
             filtered.map(p => (
               <button
@@ -175,7 +203,7 @@ export default function StockPage() {
   useEffect(() => { fetchData() }, [page, filtroProductoId])
 
   useEffect(() => {
-    api.productos.list({ limit: 200, activo: true }).then(r => setProductos(r.items)).catch(() => {})
+    api.productos.list({ limit: 100, activo: true }).then(r => setProductos(r.items)).catch(() => {})
   }, [])
 
   // ── Handlers entrada ──
